@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Создание курьера</title>
+</head>
+<body>
+  <h1>Создать курьера</h1>
+  <input type="text" id="nameInput" placeholder="Имя курьера" />
+  <button onclick="onCreate()">Создать</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function createCourier(name) {
+      const resp = await fetch(
+        'http://localhost/proekt/odata/standard.odata/Catalog_Курьеры',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ Description: name })
+        }
+      );
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      return await resp.json();
+    }
+
+    async function onCreate() {
+      const name = document.getElementById("nameInput").value;
+      try {
+        const data = await createCourier(name);
+        document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("output").textContent = err.toString();
+      }
+    }
+  </script>
+</body>
+</html>

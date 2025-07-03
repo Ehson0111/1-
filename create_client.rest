@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать клиента</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h2>Создать клиента в 1С</h2>
+    <form id="clientForm">
+        <div class="form-group">
+            <label for="description">Имя клиента:</label>
+            <input type="text" id="description" name="Description" value="Иван Иванов" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Номер телефона:</label>
+            <input type="text" id="phone" name="НомерТелефона" value="+375291234567" required>
+        </div>
+        <div class="form-group">
+            <label for="address">Адрес доставки:</label>
+            <input type="text" id="address" name="АдрессДоставки" value="ул. Примерная, 1" required>
+        </div>
+        <div class="form-group">
+            <label for="comments">Комментарии (Telegram ID):</label>
+            <input type="text" id="comments" name="Комментарии" value="1234567890">
+        </div>
+        <button type="submit">Создать клиента</button>
+    </form>
+    <div id="response"></div>
+
+    <script>
+        document.getElementById('clientForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = {
+                Description: document.getElementById('description').value,
+                Code: document.getElementById('phone').value.slice(-6),
+                НомерТелефона: document.getElementById('phone').value,
+                АдрессДоставки: document.getElementById('address').value,
+                Комментарии: document.getElementById('comments').value
+            };
+
+            const responseDiv = document.getElementById('response');
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Отправка запроса...';
+
+            try {
+                const response = await fetch('http://localhost/proekt/odata/standard.odata/Catalog_Клиенты', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const data = await response.text(); // Используем text() для обработки возможного BOM
+                    responseDiv.style.color = 'green';
+                    responseDiv.textContent = 'Клиент успешно создан! Ответ сервера: ' + data;
+                } else {
+                    const errorText = await response.text();
+                    responseDiv.style.color = 'red';
+                    responseDiv.textContent = 'Ошибка: ' + response.status + ' - ' + errorText;
+                }
+            } catch (error) {
+                responseDiv.style.color = 'red';
+                responseDiv.textContent = 'Ошибка при отправке запроса: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
